@@ -1,4 +1,3 @@
-'no local storage
 Sub Main(args)
   url$ = "https://player.fugo.ai"
 
@@ -11,12 +10,11 @@ Sub Main(args)
 
   reg.flush()
 
-  'reboots if html node not already enabled
-  rs = createobject("roregistrysection", "html")
-  mp = rs.read("mp")
+  rs = CreateObject("roRegistrySection", "html")
+  mp = rs.Read("mp")
   if mp <> "1" then
-      rs.write("mp","1")
-      rs.flush()
+      rs.Write("mp","1")
+      rs.Flush()
       RebootSystem()
   endif
 
@@ -26,7 +24,6 @@ Sub Main(args)
 End Sub
 
 Sub OpenOrCreateCurrentLog()
-  ' if there is an existing log file for today, just append to it. otherwise, create a new one to use
   fileName$ = "log.txt"
   m.logFile = CreateObject("roAppendFile", fileName$)
   if type(m.logFile) = "roAppendFile" then
@@ -200,9 +197,9 @@ Sub CreateHtmlWidget(url$ as String)
   rect = CreateObject("roRectangle", 0, 0, width, height)
 
   DebugLog("BS: Creating Html widget...")
-  gaa.htmlWidget = CreateObject("roHtmlWidget", rect)	'new added config object after rect 5-16-17
+  gaa.htmlWidget = CreateObject("roHtmlWidget", rect)
   
-  DebugLog("BS: Setting URL (" + url$ + " ) ...")
+  DebugLog("BS: Setting URL ( " + url$ + " ) ...")
   gaa.htmlWidget.SetUrl(url$)
 
   DebugLog("BS: Enabling JavaScipt...")
@@ -227,7 +224,7 @@ Sub EnterEventLoop()
   if currentConfig.ip4_address <> "" then
     ' We already have an IP addr
     receivedIpAddr = true
-    DebugLog("BS: already have an IP addr: "+currentConfig.ip4_address)
+    DebugLog("BS: Already have an IP addr: " + currentConfig.ip4_address)
   end if
 
   receivedLoadFinished = false
@@ -266,7 +263,7 @@ Sub EnterEventLoop()
     if receivedIpAddr and receivedLoadFinished then
       DebugLog("BS: OK to show HTML, showing widget now")
       gaa.htmlWidget.Show()
-      gaa.htmlWidget.PostJSMessage({msgtype:"htmlloaded"})
+      gaa.htmlWidget.PostJSMessage({ msgtype: "htmlloaded" })
       receivedIpAddr = false
       receivedLoadFinished = false
     endif
