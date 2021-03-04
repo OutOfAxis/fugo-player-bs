@@ -1,6 +1,4 @@
 Sub Main(args)
-  url$ = "https://player.fugo.ai"
-
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
 
@@ -19,7 +17,7 @@ Sub Main(args)
   endif
 
   DoCanonicalInit()
-  CreateHtmlWidget(url$)
+  CreateHtmlWidget()
   EnterEventLoop()
 End Sub
 
@@ -181,7 +179,7 @@ Sub ConfigureNetworkingWithConfig()
   endif
 End Sub
 
-Sub CreateHtmlWidget(url$ as String)
+Sub CreateHtmlWidget()
   DebugLog("BS: Creating HTML Widget")
 
   gaa = GetGlobalAA()
@@ -197,16 +195,18 @@ Sub CreateHtmlWidget(url$ as String)
   rect = CreateObject("roRectangle", 0, 0, width, height)
 
   DebugLog("BS: Creating Html widget...")
-  gaa.htmlWidget = CreateObject("roHtmlWidget", rect)
-  
-  DebugLog("BS: Setting URL ( " + url$ + " ) ...")
-  gaa.htmlWidget.SetUrl(url$)
+  config = {
+    url: "https://player.fugo.ai",
+    focus_enabled: true,
+    javascript_enabled: true,
+    storage_path: "./fugo-storage",
+    inspector_server: {
+      ip_addr: "0.0.0.0",
+      port: 2999
+    }
+  }
 
-  DebugLog("BS: Enabling JavaScipt...")
-  gaa.htmlWidget.EnableJavascript(true)
-
-  DebugLog("BS: Starting Inspector server...")
-  gaa.htmlWidget.StartInspectorServer(2999)
+  gaa.htmlWidget = CreateObject("roHtmlWidget", rect, config)
 
   DebugLog("BS: Displaying Html widget...")
   gaa.htmlWidget.Show()
