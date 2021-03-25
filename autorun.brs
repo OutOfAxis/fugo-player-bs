@@ -199,11 +199,13 @@ Sub CreateHtmlWidget()
     url: "https://player.fugo.ai",
     focus_enabled: true,
     javascript_enabled: true,
+    storage_quota: "2000000000",
     storage_path: "./fugo-storage",
     inspector_server: {
       ip_addr: "0.0.0.0",
       port: 2999
-    }
+    },
+    security_params: { websecurity: false }
   }
 
   gaa.htmlWidget = CreateObject("roHtmlWidget", rect, config)
