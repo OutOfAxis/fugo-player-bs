@@ -271,7 +271,7 @@ Sub EnterEventLoop()
         width: 720
         height: 405
         filetype: "JPEG"
-        quality: 75
+        quality: 95
         async: 0
       })
       if screenshotIsSaved
