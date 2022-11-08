@@ -96,6 +96,14 @@ Sub DoCanonicalInit()
     ConfigureDefaultNetworking()
   endif
 
+  ' Start timer
+  gaa.syslog.SendLine("BS: Starting screenshot timer")
+  gaa.screenshotTimer = CreateObject("roTimer")
+  gaa.screenshotTimer.SetPort(gaa.mp)
+  gaa.screenshotTimer.SetElapsed(5, 0)
+  gaa.screenshotTimer.SetUserData({msgtype:"takeScreenshot"})
+  gaa.screenshotTimer.Start()
+
   DebugLog("BS: Initialization completed")
 End Sub
 
@@ -200,6 +208,9 @@ Sub CreateHtmlWidget()
     focus_enabled: true,
     javascript_enabled: true,
     storage_path: "./fugo-storage",
+    security_params: {
+      websecurity: false,
+    },
     inspector_server: {
       ip_addr: "0.0.0.0",
       port: 2999
@@ -254,8 +265,21 @@ Sub EnterEventLoop()
     else if type(ev) = "roGpioButton" then
       if ev.GetInt() = 12 then stop
     else if type(ev) = "roTimerEvent" then
-      DebugLog("BS: Timer Event at " + Uptime(0))
-      DebugLog("BS: User Data:" + ev.GetUserData())
+      ' Saving screenshot
+      screenshotIsSaved = gaa.vm.Screenshot({
+        filename: "SD:/screenshot.jpeg"
+        width: 720
+        height: 405
+        filetype: "JPEG"
+        quality: 95
+        async: 0
+      })
+      if screenshotIsSaved
+        print "BS: Screenshot has been saved"
+      else
+        print "BS: Error saving screenshot"
+      end if
+      gaa.screenshotTimer.Start()
     else
       DebugLog("BS: Unhandled event: " + type(ev))
     end if
