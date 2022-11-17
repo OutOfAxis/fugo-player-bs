@@ -67,6 +67,7 @@ Sub DoCanonicalInit()
 
   OpenOrCreateCurrentLog()
 
+  DebugLog("BS: Fugo App Shell v." + gaa.version)
   DebugLog("BS: Start Initialization")
 
   DebugLog("BS: Enabling Zone Support...")
@@ -275,8 +276,6 @@ Sub EnterEventLoop()
       else
         DebugLog("BS: Unknown eventData: " + type(eventData))
       endif
-    else if type(ev) = "roGpioButton" then
-      if ev.GetInt() = 12 then stop
     else if type(ev) = "roTimerEvent" then
       timerData = ev.GetUserData()
       if timerData = "takeScreenshot" then
@@ -298,23 +297,39 @@ Sub EnterEventLoop()
       else if timerData = "checkUpdate" then
         DebugLog("BS: Checking for update")
         versionRequest = CreateObject("roUrlTransfer")
+        versionRequestPort = CreateObject("roMessagePort")
         versionRequest.SetUrl("https://raw.githubusercontent.com/OutOfAxis/fugo-player-bs/main/latest.txt")
-        latestVersion = versionRequest.GetToString().Trim()
-        DebugLog("BS: Latest version: " + latestVersion)
-        if gaa.version = latestVersion then
-          DebugLog("BS: Already up to date")
-        else
-          DebugLog("BS: Retrieving latest autorun.brs")
-          scriptRequest = CreateObject("roUrlTransfer")
-          scriptRequest.SetUrl("https://raw.githubusercontent.com/OutOfAxis/fugo-player-bs/main/autorun.brs")
-          responseCode = scriptRequest.GetToFile("autorun.tmp")
-          DebugLog("BS: Response code = " + stri(responseCode))
-          if responseCode = 200 then
-            DebugLog("BS: Performing update")
-            MoveFile("autorun.brs", "autorun.brs~")
-            MoveFile("autorun.tmp", "autorun.brs")
-            RebootSystem()
+        versionRequest.SetPort(versionRequestPort)
+        if versionRequest.AsyncGetToString() then
+          event = wait(5000, versionRequestPort)
+          if type(event) = "roUrlEvent" then
+            if event.GetResponseCode() = 200 then
+              latestVersion = event.GetString().Trim()
+              DebugLog("BS: Latest version: " + latestVersion)
+              if gaa.version = latestVersion then
+                DebugLog("BS: Already up to date")
+              else
+                DebugLog("BS: Retrieving latest autorun.brs")
+                scriptRequest = CreateObject("roUrlTransfer")
+                scriptRequest.SetUrl("https://raw.githubusercontent.com/OutOfAxis/fugo-player-bs/main/autorun.brs")
+                responseCode = scriptRequest.GetToFile("autorun.tmp")
+                DebugLog("BS: Response code = " + stri(responseCode))
+                if responseCode = 200 then
+                  DebugLog("BS: Performing update")
+                  MoveFile("autorun.brs", "autorun.brs~")
+                  MoveFile("autorun.tmp", "autorun.brs")
+                  RebootSystem()
+                end if
+              end if
+            else
+              DebugLog("BS: Request error: " + event.GetFailureReason())
+            end if
+          else if event = invalid then
+            DebugLog("BS: Request timeout")
+            versionRequest.AsyncCancel()
           end if
+        else
+          DebugLog("BS: Request could not be issued")
         end if
         gaa.autoupdateTimer.Start()
       end if
