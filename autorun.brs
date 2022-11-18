@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.0"
+  version = "1.1"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -12,8 +12,10 @@ Sub Main(args)
 
   rs = CreateObject("roRegistrySection", "html")
   mp = rs.Read("mp")
-  if mp <> "1" then
+  security = rs.Read("disable-web-security")
+  if mp <> "1" or security <> "1" then
       rs.Write("mp","1")
+      rs.Write("disable-web-security","1")
       rs.Flush()
       RebootSystem()
   endif
