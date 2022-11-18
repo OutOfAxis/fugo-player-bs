@@ -1,4 +1,6 @@
 Sub Main(args)
+  version = "1.0"
+
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
 
@@ -15,6 +17,9 @@ Sub Main(args)
       rs.Flush()
       RebootSystem()
   endif
+
+  gaa = GetGlobalAA()
+  gaa.version = version
 
   DoCanonicalInit()
   CreateHtmlWidget()
@@ -62,6 +67,7 @@ Sub DoCanonicalInit()
 
   OpenOrCreateCurrentLog()
 
+  DebugLog("BS: Fugo App Shell v." + gaa.version)
   DebugLog("BS: Start Initialization")
 
   DebugLog("BS: Enabling Zone Support...")
@@ -96,13 +102,21 @@ Sub DoCanonicalInit()
     ConfigureDefaultNetworking()
   endif
 
-  ' Start timer
+  ' Start screenshot timer
   gaa.syslog.SendLine("BS: Starting screenshot timer")
   gaa.screenshotTimer = CreateObject("roTimer")
   gaa.screenshotTimer.SetPort(gaa.mp)
   gaa.screenshotTimer.SetElapsed(5, 0)
-  gaa.screenshotTimer.SetUserData({msgtype:"takeScreenshot"})
+  gaa.screenshotTimer.SetUserData("takeScreenshot")
   gaa.screenshotTimer.Start()
+
+  ' Start autoupdate timer
+  gaa.syslog.SendLine("BS: Starting autoupdate timer")
+  gaa.autoupdateTimer = CreateObject("roTimer")
+  gaa.autoupdateTimer.SetPort(gaa.mp)
+  gaa.autoupdateTimer.SetElapsed(600, 0)
+  gaa.autoupdateTimer.SetUserData("checkUpdate")
+  gaa.autoupdateTimer.Start()
 
   DebugLog("BS: Initialization completed")
 End Sub
@@ -262,24 +276,63 @@ Sub EnterEventLoop()
       else
         DebugLog("BS: Unknown eventData: " + type(eventData))
       endif
-    else if type(ev) = "roGpioButton" then
-      if ev.GetInt() = 12 then stop
     else if type(ev) = "roTimerEvent" then
-      ' Saving screenshot
-      screenshotIsSaved = gaa.vm.Screenshot({
-        filename: "SD:/screenshot.jpeg"
-        width: 720
-        height: 405
-        filetype: "JPEG"
-        quality: 95
-        async: 0
-      })
-      if screenshotIsSaved
-        print "BS: Screenshot has been saved"
-      else
-        print "BS: Error saving screenshot"
+      timerData = ev.GetUserData()
+      if timerData = "takeScreenshot" then
+        ' Saving screenshot
+        screenshotIsSaved = gaa.vm.Screenshot({
+          filename: "SD:/screenshot.jpeg"
+          width: 720
+          height: 405
+          filetype: "JPEG"
+          quality: 95
+          async: 0
+        })
+        if screenshotIsSaved
+          print "BS: Screenshot has been saved"
+        else
+          print "BS: Error saving screenshot"
+        end if
+        gaa.screenshotTimer.Start()
+      else if timerData = "checkUpdate" then
+        DebugLog("BS: Checking for update")
+        versionRequest = CreateObject("roUrlTransfer")
+        versionRequestPort = CreateObject("roMessagePort")
+        versionRequest.SetUrl("https://raw.githubusercontent.com/OutOfAxis/fugo-player-bs/main/latest.txt")
+        versionRequest.SetPort(versionRequestPort)
+        if versionRequest.AsyncGetToString() then
+          event = wait(5000, versionRequestPort)
+          if type(event) = "roUrlEvent" then
+            if event.GetResponseCode() = 200 then
+              latestVersion = event.GetString().Trim()
+              DebugLog("BS: Latest version: " + latestVersion)
+              if gaa.version = latestVersion then
+                DebugLog("BS: Already up to date")
+              else
+                DebugLog("BS: Retrieving latest autorun.brs")
+                scriptRequest = CreateObject("roUrlTransfer")
+                scriptRequest.SetUrl("https://raw.githubusercontent.com/OutOfAxis/fugo-player-bs/main/autorun.brs")
+                responseCode = scriptRequest.GetToFile("autorun.tmp")
+                DebugLog("BS: Response code = " + stri(responseCode))
+                if responseCode = 200 then
+                  DebugLog("BS: Performing update")
+                  MoveFile("autorun.brs", "autorun.brs~")
+                  MoveFile("autorun.tmp", "autorun.brs")
+                  RebootSystem()
+                end if
+              end if
+            else
+              DebugLog("BS: Request error: " + event.GetFailureReason())
+            end if
+          else if event = invalid then
+            DebugLog("BS: Request timeout")
+            versionRequest.AsyncCancel()
+          end if
+        else
+          DebugLog("BS: Request could not be issued")
+        end if
+        gaa.autoupdateTimer.Start()
       end if
-      gaa.screenshotTimer.Start()
     else
       DebugLog("BS: Unhandled event: " + type(ev))
     end if
