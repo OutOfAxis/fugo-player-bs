@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.1"
+  version = "1.2"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -222,6 +222,7 @@ Sub CreateHtmlWidget()
   config = {
     url: "https://player.fugo.ai",
     focus_enabled: true,
+    mouse_enabled: true,
     javascript_enabled: true,
     storage_path: "./fugo-storage",
     security_params: {
