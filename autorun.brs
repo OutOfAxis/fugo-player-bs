@@ -110,7 +110,7 @@ Sub DoCanonicalInit()
   gaa.screenshotTimer.SetPort(gaa.mp)
   gaa.screenshotTimer.SetElapsed(5, 0)
   gaa.screenshotTimer.SetUserData("takeScreenshot")
-  gaa.screenshotTimer.Start()
+  ' gaa.screenshotTimer.Start()
 
   ' Start autoupdate timer
   gaa.syslog.SendLine("BS: Starting autoupdate timer")
@@ -296,7 +296,7 @@ Sub EnterEventLoop()
         else
           print "BS: Error saving screenshot"
         end if
-        gaa.screenshotTimer.Start()
+        ' gaa.screenshotTimer.Start()
       else if timerData = "checkUpdate" then
         DebugLog("BS: Checking for update")
         versionRequest = CreateObject("roUrlTransfer")
