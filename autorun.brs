@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.3"
+  version = "1.4"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -22,6 +22,14 @@ Sub Main(args)
 
   gaa = GetGlobalAA()
   gaa.version = version
+
+  ' display cursor and hide it in a corner
+  gaa.touchScreen = CreateObject("roTouchScreen")
+  if gaa.touchScreen.IsMousePresent() then
+      gaa.touchScreen.EnableCursor(true)
+      gaa.touchScreen.SetCursorPosition(0, 0)
+  endif
+
 
   DoCanonicalInit()
   CreateHtmlWidget()
