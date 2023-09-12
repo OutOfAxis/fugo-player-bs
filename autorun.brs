@@ -23,6 +23,12 @@ Sub Main(args)
   gaa = GetGlobalAA()
   gaa.version = version
 
+  ' display cursor and hide it in a corner
+  gaa.touchScreen = CreateObject("roTouchScreen")
+  gaa.touchScreen.EnableCursor(true)
+  gaa.touchScreen.SetCursorPosition(0, 0)
+
+
   DoCanonicalInit()
   CreateHtmlWidget()
   EnterEventLoop()
