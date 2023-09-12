@@ -25,8 +25,10 @@ Sub Main(args)
 
   ' display cursor and hide it in a corner
   gaa.touchScreen = CreateObject("roTouchScreen")
-  gaa.touchScreen.EnableCursor(true)
-  gaa.touchScreen.SetCursorPosition(0, 0)
+  if gaa.touchScreen.IsMousePresent() then
+      gaa.touchScreen.EnableCursor(true)
+      gaa.touchScreen.SetCursorPosition(0, 0)
+  endif
 
 
   DoCanonicalInit()
