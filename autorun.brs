@@ -20,6 +20,12 @@ Sub Main(args)
       RebootSystem()
   endif
 
+  webInspector = rs.Read("enable_web_inspector")
+  if webInspector <> "1" then
+      rs.Write("enable_web_inspector", "1")
+      rs.Flush()
+  endif
+
   gaa = GetGlobalAA()
   gaa.version = version
 
@@ -116,9 +122,9 @@ Sub DoCanonicalInit()
   gaa.syslog.SendLine("BS: Starting screenshot timer")
   gaa.screenshotTimer = CreateObject("roTimer")
   gaa.screenshotTimer.SetPort(gaa.mp)
-  gaa.screenshotTimer.SetElapsed(5, 0)
+  gaa.screenshotTimer.SetElapsed(10, 0)
   gaa.screenshotTimer.SetUserData("takeScreenshot")
-  ' gaa.screenshotTimer.Start()
+  gaa.screenshotTimer.Start()
 
   ' Start autoupdate timer
   gaa.syslog.SendLine("BS: Starting autoupdate timer")
@@ -296,7 +302,7 @@ Sub EnterEventLoop()
           width: 720
           height: 405
           filetype: "JPEG"
-          quality: 95
+          quality: 75
           async: 0
         })
         if screenshotIsSaved
@@ -304,7 +310,7 @@ Sub EnterEventLoop()
         else
           print "BS: Error saving screenshot"
         end if
-        ' gaa.screenshotTimer.Start()
+        gaa.screenshotTimer.Start()
       else if timerData = "checkUpdate" then
         DebugLog("BS: Checking for update")
         versionRequest = CreateObject("roUrlTransfer")
