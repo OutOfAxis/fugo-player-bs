@@ -238,6 +238,7 @@ Sub CreateHtmlWidget()
     focus_enabled: true,
     mouse_enabled: true,
     javascript_enabled: true,
+    brightsign_js_objects_enabled: true,
     storage_path: "./fugo-storage",
     security_params: {
       websecurity: false,
@@ -249,6 +250,7 @@ Sub CreateHtmlWidget()
   }
 
   gaa.htmlWidget = CreateObject("roHtmlWidget", rect, config)
+  gaa.htmlWidget.SetPort(gaa.mp)
 
   DebugLog("BS: Displaying Html widget...")
   gaa.htmlWidget.Show()
@@ -288,7 +290,11 @@ Sub EnterEventLoop()
           DebugLog("BS: Received load finished")
           receivedLoadFinished = true
         else if eventData.reason = "message" then
-          DebugLog("BS: Message receved: " + eventData.message)
+          DebugLog("BS: Message receved: " + FormatJson(eventData.message, 0))
+          if eventData.message.screenshotInterval <> invalid then
+            gaa.screenshotTimer.SetElapsed((val(eventData.message.screenshotInterval) / 1000), 0)
+            DebugLog("BS: Updated screenshot interval")
+          end if
         endif
       else
         DebugLog("BS: Unknown eventData: " + type(eventData))
