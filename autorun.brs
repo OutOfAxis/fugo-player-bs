@@ -294,6 +294,14 @@ Sub EnterEventLoop()
           if eventData.message.screenshotInterval <> invalid then
             gaa.screenshotTimer.SetElapsed((val(eventData.message.screenshotInterval) / 1000), 0)
             DebugLog("BS: Updated screenshot interval")
+          else if eventData.message.isScreenshotEnabled <> invalid then
+            if eventData.message.isScreenshotEnabled = "true" then
+              gaa.screenshotTimer.Start()
+              DebugLog("BS: Screenshotting enabled")
+            else
+              gaa.screenshotTimer.Stop()
+              DebugLog("BS: Screenshotting disabled")
+            end if
           end if
         endif
       else
