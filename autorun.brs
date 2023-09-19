@@ -20,6 +20,12 @@ Sub Main(args)
       RebootSystem()
   endif
 
+  webInspector = rs.Read("enable_web_inspector")
+  if webInspector <> "1" then
+      rs.Write("enable_web_inspector", "1")
+      rs.Flush()
+  endif
+
   gaa = GetGlobalAA()
   gaa.version = version
 
@@ -116,9 +122,9 @@ Sub DoCanonicalInit()
   gaa.syslog.SendLine("BS: Starting screenshot timer")
   gaa.screenshotTimer = CreateObject("roTimer")
   gaa.screenshotTimer.SetPort(gaa.mp)
-  gaa.screenshotTimer.SetElapsed(5, 0)
+  gaa.screenshotTimer.SetElapsed(10, 0)
   gaa.screenshotTimer.SetUserData("takeScreenshot")
-  ' gaa.screenshotTimer.Start()
+  gaa.screenshotTimer.Start()
 
   ' Start autoupdate timer
   gaa.syslog.SendLine("BS: Starting autoupdate timer")
@@ -232,6 +238,7 @@ Sub CreateHtmlWidget()
     focus_enabled: true,
     mouse_enabled: true,
     javascript_enabled: true,
+    brightsign_js_objects_enabled: true,
     storage_path: "./fugo-storage",
     security_params: {
       websecurity: false,
@@ -243,6 +250,7 @@ Sub CreateHtmlWidget()
   }
 
   gaa.htmlWidget = CreateObject("roHtmlWidget", rect, config)
+  gaa.htmlWidget.SetPort(gaa.mp)
 
   DebugLog("BS: Displaying Html widget...")
   gaa.htmlWidget.Show()
@@ -282,7 +290,19 @@ Sub EnterEventLoop()
           DebugLog("BS: Received load finished")
           receivedLoadFinished = true
         else if eventData.reason = "message" then
-          DebugLog("BS: Message receved: " + eventData.message)
+          DebugLog("BS: Message receved: " + FormatJson(eventData.message, 0))
+          if eventData.message.screenshotInterval <> invalid then
+            gaa.screenshotTimer.SetElapsed((val(eventData.message.screenshotInterval) / 1000), 0)
+            DebugLog("BS: Updated screenshot interval")
+          else if eventData.message.isScreenshotEnabled <> invalid then
+            if eventData.message.isScreenshotEnabled = "true" then
+              gaa.screenshotTimer.Start()
+              DebugLog("BS: Screenshotting enabled")
+            else
+              gaa.screenshotTimer.Stop()
+              DebugLog("BS: Screenshotting disabled")
+            end if
+          end if
         endif
       else
         DebugLog("BS: Unknown eventData: " + type(eventData))
@@ -296,7 +316,7 @@ Sub EnterEventLoop()
           width: 720
           height: 405
           filetype: "JPEG"
-          quality: 95
+          quality: 75
           async: 0
         })
         if screenshotIsSaved
@@ -304,7 +324,7 @@ Sub EnterEventLoop()
         else
           print "BS: Error saving screenshot"
         end if
-        ' gaa.screenshotTimer.Start()
+        gaa.screenshotTimer.Start()
       else if timerData = "checkUpdate" then
         DebugLog("BS: Checking for update")
         versionRequest = CreateObject("roUrlTransfer")
