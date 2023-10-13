@@ -36,7 +36,6 @@ Sub Main(args)
       gaa.touchScreen.SetCursorPosition(0, 0)
   endif
 
-
   DoCanonicalInit()
   CreateHtmlWidget()
   EnterEventLoop()
@@ -117,14 +116,6 @@ Sub DoCanonicalInit()
   else
     ConfigureDefaultNetworking()
   endif
-
-  ' Start screenshot timer
-  gaa.syslog.SendLine("BS: Starting screenshot timer")
-  gaa.screenshotTimer = CreateObject("roTimer")
-  gaa.screenshotTimer.SetPort(gaa.mp)
-  gaa.screenshotTimer.SetElapsed(10, 0)
-  gaa.screenshotTimer.SetUserData("takeScreenshot")
-  gaa.screenshotTimer.Start()
 
   ' Start autoupdate timer
   gaa.syslog.SendLine("BS: Starting autoupdate timer")
@@ -234,19 +225,21 @@ Sub CreateHtmlWidget()
 
   DebugLog("BS: Creating Html widget...")
   config = {
-    url: "https://player.fugo.ai",
+    url: "https://deploy-preview-498--fugo-player.netlify.app/",
     focus_enabled: true,
     mouse_enabled: true,
     javascript_enabled: true,
     brightsign_js_objects_enabled: true,
+    nodejs_enabled: true,
     storage_path: "./fugo-storage",
+		storage_quota: 1073741824,
     security_params: {
       websecurity: false,
-    },
-    inspector_server: {
-      ip_addr: "0.0.0.0",
-      port: 2999
     }
+    ', inspector_server: {
+    '  ip_addr: "0.0.0.0",
+    '  port: 2999
+    '}
   }
 
   gaa.htmlWidget = CreateObject("roHtmlWidget", rect, config)
@@ -291,16 +284,19 @@ Sub EnterEventLoop()
           receivedLoadFinished = true
         else if eventData.reason = "message" then
           DebugLog("BS: Message receved: " + FormatJson(eventData.message, 0))
-          if eventData.message.screenshotInterval <> invalid then
-            gaa.screenshotTimer.SetElapsed((val(eventData.message.screenshotInterval) / 1000), 0)
-            DebugLog("BS: Updated screenshot interval")
-          else if eventData.message.isScreenshotEnabled <> invalid then
-            if eventData.message.isScreenshotEnabled = "true" then
-              gaa.screenshotTimer.Start()
-              DebugLog("BS: Screenshotting enabled")
+          if eventData.message.updateScreenshot <> invalid then
+            gaa.vm.Screenshot({
+              filename: "SD:/screenshot.jpeg"
+              width: 720
+              height: 405
+              filetype: "JPEG"
+              quality: 75
+              async: 0
+            })
+            if screenshotIsSaved
+              print "BS: Screenshot has been saved"
             else
-              gaa.screenshotTimer.Stop()
-              DebugLog("BS: Screenshotting disabled")
+              print "BS: Error saving screenshot"
             end if
           end if
         endif
@@ -309,23 +305,7 @@ Sub EnterEventLoop()
       endif
     else if type(ev) = "roTimerEvent" then
       timerData = ev.GetUserData()
-      if timerData = "takeScreenshot" then
-        ' Saving screenshot
-        screenshotIsSaved = gaa.vm.Screenshot({
-          filename: "SD:/screenshot.jpeg"
-          width: 720
-          height: 405
-          filetype: "JPEG"
-          quality: 75
-          async: 0
-        })
-        if screenshotIsSaved
-          print "BS: Screenshot has been saved"
-        else
-          print "BS: Error saving screenshot"
-        end if
-        gaa.screenshotTimer.Start()
-      else if timerData = "checkUpdate" then
+      if timerData = "checkUpdate" then
         DebugLog("BS: Checking for update")
         versionRequest = CreateObject("roUrlTransfer")
         versionRequestPort = CreateObject("roMessagePort")
