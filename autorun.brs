@@ -225,7 +225,7 @@ Sub CreateHtmlWidget()
 
   DebugLog("BS: Creating Html widget...")
   config = {
-    url: "https://deploy-preview-498--fugo-player.netlify.app/",
+    url: "https://player.fugo.ai",
     focus_enabled: true,
     mouse_enabled: true,
     javascript_enabled: true,
@@ -236,10 +236,6 @@ Sub CreateHtmlWidget()
     security_params: {
       websecurity: false,
     }
-    ', inspector_server: {
-    '  ip_addr: "0.0.0.0",
-    '  port: 2999
-    '}
   }
 
   gaa.htmlWidget = CreateObject("roHtmlWidget", rect, config)
