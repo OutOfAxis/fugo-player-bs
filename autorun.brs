@@ -280,21 +280,6 @@ Sub EnterEventLoop()
           receivedLoadFinished = true
         else if eventData.reason = "message" then
           DebugLog("BS: Message receved: " + FormatJson(eventData.message, 0))
-          if eventData.message.updateScreenshot <> invalid then
-            gaa.vm.Screenshot({
-              filename: "SD:/screenshot.jpeg"
-              width: 720
-              height: 405
-              filetype: "JPEG"
-              quality: 75
-              async: 0
-            })
-            if screenshotIsSaved
-              print "BS: Screenshot has been saved"
-            else
-              print "BS: Error saving screenshot"
-            end if
-          end if
         endif
       else
         DebugLog("BS: Unknown eventData: " + type(eventData))
