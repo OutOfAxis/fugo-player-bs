@@ -232,7 +232,7 @@ Sub CreateHtmlWidget()
     brightsign_js_objects_enabled: true,
     nodejs_enabled: true,
     storage_path: "./fugo-storage",
-		storage_quota: 1073741824,
+    storage_quota: 1073741824,
     security_params: {
       websecurity: false,
     }
