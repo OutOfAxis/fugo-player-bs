@@ -241,6 +241,10 @@ Sub CreateHtmlWidget()
   gaa.htmlWidget = CreateObject("roHtmlWidget", rect, config)
   gaa.htmlWidget.SetPort(gaa.mp)
 
+  if gaa.touchScreen.IsMousePresent() then
+    gaa.htmlWidget.EnableScrollbars(true)
+  end if
+
   DebugLog("BS: Displaying Html widget...")
   gaa.htmlWidget.Show()
 End Sub
