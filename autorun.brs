@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.5"
+  version = "1.6"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -240,6 +240,10 @@ Sub CreateHtmlWidget()
 
   gaa.htmlWidget = CreateObject("roHtmlWidget", rect, config)
   gaa.htmlWidget.SetPort(gaa.mp)
+
+  if gaa.touchScreen.IsMousePresent() then
+    gaa.htmlWidget.EnableScrollbars(true)
+  end if
 
   DebugLog("BS: Displaying Html widget...")
   gaa.htmlWidget.Show()
