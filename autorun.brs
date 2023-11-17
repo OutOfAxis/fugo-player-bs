@@ -243,6 +243,12 @@ Sub CreateHtmlWidget()
 
   if gaa.touchScreen.IsMousePresent() then
     gaa.htmlWidget.EnableScrollbars(true)
+    if MatchFiles("/", "bsvirtualkb").Count() > 0 then
+      DebugLog("BS: Creating virtual keyboard...")
+      gaa.virtualKeyboard = CreateObject("roVirtualKeyboard", rect)
+      gaa.virtualKeyboard.SetResource("file:///bsvirtualkb/bsvirtualkb.html")
+      gaa.virtualKeyboard.SetPort(gaa.mp)
+    end if
   end if
 
   DebugLog("BS: Displaying Html widget...")
@@ -329,6 +335,13 @@ Sub EnterEventLoop()
         end if
         gaa.autoupdateTimer.Start()
       end if
+    else if type(ev) = "roVirtualKeyboardEvent" then
+      if ev.GetData().reason = "show-event"
+        gaa.virtualKeyboard.Show()
+      endif
+      if ev.GetData().reason = "hide-event"
+        gaa.virtualKeyboard.Hide()
+      endif
     else
       DebugLog("BS: Unhandled event: " + type(ev))
     end if
