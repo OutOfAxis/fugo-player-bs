@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.6"
+  version = "1.7"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
