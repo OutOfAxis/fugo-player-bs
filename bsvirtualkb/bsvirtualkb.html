@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/all.css">
+</head>
+<body ng-app="bsApp" ng-controller="bsController" style="background-color: rgba(0,0,0,0)">
+<div id="empty_background" ng-click="clickMe('cancel')"></div>
+    <div class="ui-keyboard ui-keyboard-container center-block dropdown-menu ui-keyboard-has-focus" role="textbox"
+         id="keyboard_keyboard">
+        <div class="ui-keyboard-keyset ui-keyboard-keyset-normal" style="display: inline-block;">
+            <span ng-repeat="row in rows">
+                <span ng-repeat="key in getKeys(row) track by $index">
+                    <button ng-if="key!='tab'" role="button" type="button" ng-class="getClasses(key)"
+                            class="ui-keyboard-button btn" ng-click="clickMe(key)" ng-style="keyboardSize">
+                        <span class="ui-keyboard-text">{{getKey(key)}}</span>
+                    </button>
+                    <span ng-if="key=='tab'" class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" title="Language" type="button" id="languageDropdownMenu"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-model="lang" ng-style="keyboardSize">
+                            {{lang}}
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu language-menu" aria-labelledby="languageDropdownMenu" ng-style="keyboardSize">
+                            <li ng-repeat="lang in langs" ng-click="setLang(lang)">{{lang}}</li>
+                        </ul>
+                    </span>
+                </span>
+            <br class="ui-keyboard-button-endrow">
+            </span>
+        </div>
+    </div>
+<script src="js/all.js"></script>
+</body>
+</html>
