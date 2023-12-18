@@ -211,6 +211,11 @@ End Sub
 Sub CreateHtmlWidget()
   DebugLog("BS: Creating HTML Widget")
 
+  RegHtml = CreateObject("roRegistrySection", "html")
+  RegHtml.Write("disable-web-security", "0")
+  RegHtml.Write("use-brightsign-media-player", "1")
+  RegHtml.Flush()
+
   gaa = GetGlobalAA()
   width = gaa.vm.GetResX()
   height = gaa.vm.GetResY()
