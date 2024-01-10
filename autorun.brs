@@ -118,12 +118,12 @@ Sub DoCanonicalInit()
   endif
 
   ' Start autoupdate timer
-  gaa.syslog.SendLine("BS: Starting autoupdate timer")
-  gaa.autoupdateTimer = CreateObject("roTimer")
-  gaa.autoupdateTimer.SetPort(gaa.mp)
-  gaa.autoupdateTimer.SetElapsed(600, 0)
-  gaa.autoupdateTimer.SetUserData("checkUpdate")
-  gaa.autoupdateTimer.Start()
+  ' gaa.syslog.SendLine("BS: Starting autoupdate timer")
+  ' gaa.autoupdateTimer = CreateObject("roTimer")
+  ' gaa.autoupdateTimer.SetPort(gaa.mp)
+  ' gaa.autoupdateTimer.SetElapsed(600, 0)
+  ' gaa.autoupdateTimer.SetUserData("checkUpdate")
+  ' gaa.autoupdateTimer.Start()
 
   DebugLog("BS: Initialization completed")
 End Sub
