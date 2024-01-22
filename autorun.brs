@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.7"
+  version = "1.8"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -108,7 +108,7 @@ Sub DoCanonicalInit()
 
   DebugLog("BS: Setting system time...")
   sysTime = CreateObject("roSystemTime")
-  sysTime.SetTimeZone("GMT+4")
+  sysTime.SetTimeZone("PST")
 
   DebugLog("BS: Configuring networking...")
   if gaa.config <> invalid then
