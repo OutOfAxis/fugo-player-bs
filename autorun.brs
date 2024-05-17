@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.9"
+  version = "1.10"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -279,6 +279,11 @@ Sub EnterEventLoop()
 
     if type(ev) = "roNetworkAttached" then
       receivedIpAddr = true
+      if gaa.htmlWidget <> invalid then
+        Sleep(10000)
+        DebugLog("BS: Trying to recreate HTML widget")
+        CreateHtmlWidget()
+      endif
     else if type(ev) = "roHtmlWidgetEvent" then
       eventData = ev.GetData()
       if type(eventData) = "roAssociativeArray" and type(eventData.reason) = "roString" then
