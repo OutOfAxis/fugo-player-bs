@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.10"
+  version = "1.11"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -271,6 +271,7 @@ Sub EnterEventLoop()
   end if
 
   receivedLoadFinished = false
+  receivedLoadError = false
 
   while true
     ev = wait(0, gaa.mp)
@@ -279,10 +280,11 @@ Sub EnterEventLoop()
 
     if type(ev) = "roNetworkAttached" then
       receivedIpAddr = true
-      if gaa.htmlWidget <> invalid then
+      if gaa.htmlWidget <> invalid and receivedLoadError then
         Sleep(10000)
         DebugLog("BS: Trying to recreate HTML widget")
         CreateHtmlWidget()
+        receivedLoadError = false
       endif
     else if type(ev) = "roHtmlWidgetEvent" then
       eventData = ev.GetData()
@@ -290,6 +292,7 @@ Sub EnterEventLoop()
         DebugLog("BS: Event data: " + FormatJson(ev.GetData(), 0))
         if eventData.reason = "load-error" then
           DebugLog("BS: HTML load error: " + eventData.message)
+          receivedLoadError = true
         else if eventData.reason = "load-finished" then
           DebugLog("BS: Received load finished")
           receivedLoadFinished = true
