@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.11"
+  version = "1.12"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -28,13 +28,6 @@ Sub Main(args)
 
   gaa = GetGlobalAA()
   gaa.version = version
-
-  ' display cursor and hide it in a corner
-  gaa.touchScreen = CreateObject("roTouchScreen")
-  if gaa.touchScreen.IsMousePresent() then
-      gaa.touchScreen.EnableCursor(true)
-      gaa.touchScreen.SetCursorPosition(0, 0)
-  endif
 
   DoCanonicalInit()
   CreateHtmlWidget()
@@ -98,6 +91,19 @@ Sub DoCanonicalInit()
   DebugLog("BS: Setting video mode...")
   gaa.vm = CreateObject("roVideoMode")
   gaa.vm.setMode("1920x1080x60p")
+
+  DebugLog("BS: Setting mouse pointer...")
+  gaa.touchScreen = CreateObject("roTouchScreen")
+  if gaa.touchScreen.IsMousePresent() then
+    DebugLog("BS: Mouse is connected")
+    DebugLog("BS: Enabling cursor...")
+    gaa.touchScreen.EnableCursor(true)
+    gaa.touchScreen.SetCursorPosition(0, 0)
+  else
+    DebugLog("BS: Mouse is not connected")
+    DebugLog("BS: Disabling cursor...")
+    gaa.touchScreen.EnableCursor(false)
+  endif
 
   DebugLog("BS: Setting network hotplug...")
   gaa.hp = CreateObject("roNetworkHotplug")
