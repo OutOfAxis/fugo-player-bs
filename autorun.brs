@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.12"
+  version = "1.13"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -30,6 +30,7 @@ Sub Main(args)
   gaa.version = version
 
   DoCanonicalInit()
+  AutoconfigureTimezone()
   CreateHtmlWidget()
   EnterEventLoop()
 End Sub
@@ -113,8 +114,8 @@ Sub DoCanonicalInit()
   LoadConfig()
 
   DebugLog("BS: Setting system time...")
-  sysTime = CreateObject("roSystemTime")
-  sysTime.SetTimeZone("PST")
+  gaa.sysTime = CreateObject("roSystemTime")
+  gaa.sysTime.SetTimeZone("PST")
 
   DebugLog("BS: Configuring networking...")
   if gaa.config <> invalid then
@@ -368,4 +369,34 @@ Sub EnterEventLoop()
       receivedLoadFinished = false
     endif
   endwhile
+End Sub
+
+Sub AutoconfigureTimezone()
+  gaa = GetGlobalAA()
+  DebugLog("BS: Requesting timezone...")
+  req = CreateObject("roUrlTransfer")
+  reqPort = CreateObject("roMessagePort")
+  req.SetUrl("http://timezone-detector.cloud.fugo.ai/tz")
+  req.SetPort(reqPort)
+  if req.AsyncGetToString() then
+    event = wait(5000, reqPort)
+    if type(event) = "roUrlEvent" then
+      if event.GetResponseCode() = 200 then
+        resp = event.GetString()
+        DebugLog("BS: Response: " + resp)
+        respJson = ParseJson(resp)
+        if respJson <> invalid and respJson.posix <> invalid then
+          DebugLog("BS: Setting timezone...")
+          success = gaa.sysTime.SetTimeZone("POSIX:" + respJson.posix)
+          if not success then
+            DebugLog("BS: Error setting timezone: " + respJson.posix)
+          end if
+        else
+          DebugLog("BS: Bad response format")
+        end if
+      else
+        DebugLog("BS: Bad response: " + event.GetResponseCode())
+      end if
+    end if
+  end if
 End Sub
