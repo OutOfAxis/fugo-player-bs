@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.14"
+  version = "1.13"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -232,7 +232,7 @@ Sub CreateHtmlWidget()
 
   DebugLog("BS: Creating Html widget...")
   config = {
-    url: "https://player.fugo.ai/?appShellVersion=" + gaa.version,
+    url: "https://player.fugo.ai",
     focus_enabled: true,
     mouse_enabled: true,
     javascript_enabled: true,
