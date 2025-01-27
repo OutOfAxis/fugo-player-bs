@@ -231,6 +231,7 @@ Sub CreateHtmlWidget()
   gaa.htmlWidget = CreateObject("roHtmlWidget", rect, config)
   gaa.htmlWidget.SetPort(gaa.mp)
 
+  gaa.touchScreen = CreateObject("roTouchScreen")
   if gaa.touchScreen.IsMousePresent() then
     gaa.htmlWidget.EnableScrollbars(true)
     if MatchFiles("/", "bsvirtualkb").Count() > 0 then
