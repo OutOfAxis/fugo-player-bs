@@ -92,18 +92,6 @@ Sub DoCanonicalInit()
   gaa.vm = CreateObject("roVideoMode")
   gaa.vm.setMode("1920x1080x60p")
 
-  DebugLog("BS: Setting mouse pointer...")
-  gaa.touchScreen = CreateObject("roTouchScreen")
-  if gaa.touchScreen.IsMousePresent() then
-    DebugLog("BS: Mouse is connected")
-    DebugLog("BS: Enabling cursor...")
-    gaa.touchScreen.EnableCursor(true)
-    gaa.touchScreen.SetCursorPosition(0, 0)
-  else
-    DebugLog("BS: Mouse is not connected")
-    DebugLog("BS: Disabling cursor...")
-    gaa.touchScreen.EnableCursor(false)
-  endif
 
   DebugLog("BS: Setting network hotplug...")
   gaa.hp = CreateObject("roNetworkHotplug")
@@ -111,10 +99,6 @@ Sub DoCanonicalInit()
 
   DebugLog("BS: Loading configuration...")
   LoadConfig()
-
-  DebugLog("BS: Setting system time...")
-  sysTime = CreateObject("roSystemTime")
-  sysTime.SetTimeZone("PST")
 
   DebugLog("BS: Configuring networking...")
   if gaa.config <> invalid then
