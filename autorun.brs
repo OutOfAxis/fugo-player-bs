@@ -90,8 +90,6 @@ Sub DoCanonicalInit()
 
   DebugLog("BS: Setting video mode...")
   gaa.vm = CreateObject("roVideoMode")
-  gaa.vm.setMode("1920x1080x60p")
-
 
   DebugLog("BS: Setting network hotplug...")
   gaa.hp = CreateObject("roNetworkHotplug")
