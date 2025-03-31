@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.15"
+  version = "1.16"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -230,7 +230,9 @@ Sub CreateHtmlWidget()
   gaa.htmlWidget.SetPort(gaa.mp)
 
   gaa.touchScreen = CreateObject("roTouchScreen")
-  if gaa.touchScreen.IsMousePresent() then
+  if gaa.touchScreen = invalid then
+    DebugLog("BS: ERROR - Failed to create TouchScreen")
+  else if gaa.touchScreen.IsMousePresent() then
     gaa.htmlWidget.EnableScrollbars(true)
     if MatchFiles("/", "bsvirtualkb").Count() > 0 then
       DebugLog("BS: Creating virtual keyboard...")
