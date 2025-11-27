@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.16"
+  version = "1.17"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -288,6 +288,11 @@ Sub EnterEventLoop()
           DebugLog("BS: Received load finished")
           receivedLoadFinished = true
         else if eventData.reason = "message" then
+          if eventData.message.command = "fugo-hide" then
+            gaa.htmlWidget.Hide()
+          else if eventData.message.command = "fugo-show" then
+            gaa.htmlWidget.Show()
+          endif
           DebugLog("BS: Message receved: " + FormatJson(eventData.message, 0))
         endif
       else
