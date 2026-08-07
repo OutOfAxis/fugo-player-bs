@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.17"
+  version = "1.18"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -28,11 +28,62 @@ Sub Main(args)
 
   gaa = GetGlobalAA()
   gaa.version = version
+  gaa.dateTime = CreateObject("roSystemTime")
 
   DoCanonicalInit()
   CreateHtmlWidget()
   EnterEventLoop()
 End Sub
+
+Function VersionPartToNumber(part as String) as Integer
+  if part = "" then
+    return 0
+  endif
+  return Val(part)
+End Function
+
+Function SplitVersion(version as String) as Object
+  parts = []
+  rest = version
+
+  while true
+    dot = Instr(1, rest, ".")
+    if dot = 0 then
+      parts.Push(VersionPartToNumber(rest))
+      exit while
+    endif
+    parts.Push(VersionPartToNumber(Mid(rest, 1, dot - 1)))
+    rest = Mid(rest, dot + 1)
+  end while
+
+  return parts
+End Function
+
+Function IsNewerVersion(candidate as String, current as String)
+  candidateParts = SplitVersion(candidate)
+  currentParts = SplitVersion(current)
+
+  count = candidateParts.Count()
+  if currentParts.Count() > count then
+    count = currentParts.Count()
+  endif
+
+  for i = 0 to count - 1
+    candidateValue = 0
+    if i < candidateParts.Count() then candidateValue = candidateParts[i]
+
+    currentValue = 0
+    if i < currentParts.Count() then currentValue = currentParts[i]
+
+    if candidateValue > currentValue then
+      return true
+    else if candidateValue < currentValue then
+      return false
+    endif
+  end for
+
+  return false
+End Function
 
 Sub OpenOrCreateCurrentLog()
   fileName$ = "log.txt"
@@ -74,7 +125,9 @@ Sub DoCanonicalInit()
   gaa.syslog = CreateObject("roSystemLog")
 
   OpenOrCreateCurrentLog()
-
+  dt = gaa.dateTime.GetUtcDateTime() 
+  DebugLog("BS: Current time: " + dt.ToISOString() + " " + stri(dt.ToSecondsSinceEpoch()))
+  
   DebugLog("BS: Fugo App Shell v." + gaa.version)
   DebugLog("BS: Start Initialization")
 
@@ -202,6 +255,29 @@ Sub CreateHtmlWidget()
   gaa = GetGlobalAA()
   width = gaa.vm.GetResX()
   height = gaa.vm.GetResY()
+  
+  DebugLog("BS: Width x Height: " + stri(width) + " x " + stri(height))
+
+  modes = gaa.vm.GetScreenModes()
+  DebugLog("BS: Screen modes: " + FormatJson(modes, 0))
+
+  availableModes = gaa.vm.GetAvailableModes()
+  DebugLog("BS: Available modes: " + FormatJson(availableModes, 0))
+
+  activeMode = gaa.vm.GetActiveMode()
+  DebugLog("BS: Active mode: " + FormatJson(activeMode, 0))
+
+  configuredMode = gaa.vm.GetConfiguredMode()
+  DebugLog("BS: Configured mode: " + FormatJson(configuredMode, 0))
+
+  vresx = gaa.vm.GetVideoResX()
+  vresy = gaa.vm.GetVideoResY()
+  DebugLog("BS: Video resolution: " + stri(vresx) + " x " + stri(vresy))
+
+  oresx = gaa.vm.GetOutputResX()
+  oresy = gaa.vm.GetOutputResY()
+  DebugLog("BS: Output resolution: " + stri(oresx) + " x " + stri(oresy))
+
 
   if gaa.htmlWidget <> invalid then
     DebugLog("BS: Hidding html widget...")
@@ -301,7 +377,8 @@ Sub EnterEventLoop()
     else if type(ev) = "roTimerEvent" then
       timerData = ev.GetUserData()
       if timerData = "checkUpdate" then
-        DebugLog("BS: Checking for update")
+        dt = gaa.dateTime.GetUtcDateTime()
+        DebugLog("BS: Checking for update at: " + dt.ToISOString() + " " + stri(dt.ToSecondsSinceEpoch()))
         versionRequest = CreateObject("roUrlTransfer")
         versionRequestPort = CreateObject("roMessagePort")
         versionRequest.SetUrl("https://raw.githubusercontent.com/OutOfAxis/fugo-player-bs/main/latest.txt")
@@ -312,8 +389,8 @@ Sub EnterEventLoop()
             if event.GetResponseCode() = 200 then
               latestVersion = event.GetString().Trim()
               DebugLog("BS: Latest version: " + latestVersion)
-              if gaa.version = latestVersion then
-                DebugLog("BS: Already up to date")
+              if not IsNewerVersion(latestVersion, gaa.version) then
+                DebugLog("BS: No update needed, running " + gaa.version + ", latest " + latestVersion)
               else
                 DebugLog("BS: Retrieving latest autorun.brs")
                 scriptRequest = CreateObject("roUrlTransfer")
