@@ -1,5 +1,5 @@
 Sub Main(args)
-  version = "1.17"
+  version = "1.18"
 
   reg = CreateObject("roRegistrySection", "networking")
   reg.write("ssh","22")
@@ -28,6 +28,7 @@ Sub Main(args)
 
   gaa = GetGlobalAA()
   gaa.version = version
+  gaa.dateTime = CreateObject("roSystemTime")
 
   DoCanonicalInit()
   CreateHtmlWidget()
@@ -74,7 +75,9 @@ Sub DoCanonicalInit()
   gaa.syslog = CreateObject("roSystemLog")
 
   OpenOrCreateCurrentLog()
-
+  dt = gaa.dateTime.GetUtcDateTime() 
+  DebugLog("BS: Current time: " + dt.ToISOString() + " " + stri(dt.ToSecondsSinceEpoch()))
+  
   DebugLog("BS: Fugo App Shell v." + gaa.version)
   DebugLog("BS: Start Initialization")
 
@@ -202,6 +205,29 @@ Sub CreateHtmlWidget()
   gaa = GetGlobalAA()
   width = gaa.vm.GetResX()
   height = gaa.vm.GetResY()
+  
+  DebugLog("BS: Width x Height: " + stri(width) + " x " + stri(height))
+
+  modes = gaa.vm.GetScreenModes()
+  DebugLog("BS: Screen modes: " + FormatJson(modes, 0))
+
+  availableModes = gaa.vm.GetAvailableModes()
+  DebugLog("BS: Available modes: " + FormatJson(availableModes, 0))
+
+  activeMode = gaa.vm.GetActiveMode()
+  DebugLog("BS: Active mode: " + FormatJson(activeMode, 0))
+
+  configuredMode = gaa.vm.GetConfiguredMode()
+  DebugLog("BS: Configured mode: " + FormatJson(configuredMode, 0))
+
+  vresx = gaa.vm.GetVideoResX()
+  vresy = gaa.vm.GetVideoResY()
+  DebugLog("BS: Video resolution: " + stri(vresx) + " x " + stri(vresy))
+
+  oresx = gaa.vm.GetOutputResX()
+  oresy = gaa.vm.GetOutputResY()
+  DebugLog("BS: Output resolution: " + stri(oresx) + " x " + stri(oresy))
+
 
   if gaa.htmlWidget <> invalid then
     DebugLog("BS: Hidding html widget...")
@@ -301,7 +327,8 @@ Sub EnterEventLoop()
     else if type(ev) = "roTimerEvent" then
       timerData = ev.GetUserData()
       if timerData = "checkUpdate" then
-        DebugLog("BS: Checking for update")
+        dt = gaa.dateTime.GetUtcDateTime()
+        DebugLog("BS: Checking for update at: " + dt.ToISOString() + " " + stri(dt.ToSecondsSinceEpoch()))
         versionRequest = CreateObject("roUrlTransfer")
         versionRequestPort = CreateObject("roMessagePort")
         versionRequest.SetUrl("https://raw.githubusercontent.com/OutOfAxis/fugo-player-bs/main/latest.txt")
